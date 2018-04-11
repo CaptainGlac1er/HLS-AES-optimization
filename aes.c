@@ -23,6 +23,7 @@ const unsigned char SBox[256] = {
 const unsigned char RCon[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36};
 
 #define xTime(x) ((x<<1) ^ ((x & 0x080) ? 0x1b : 0x00))
+int i,j;
 
 unsigned char reverse(unsigned char b) {
    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
@@ -36,8 +37,8 @@ void encrypt(unsigned char PlainText_16[16], unsigned char Key_16[16], unsigned 
     unsigned char PlainText[4][4];
     unsigned char Key[4][4];
     unsigned char CipherText[4][4];
-    for(int i=0; i<4; i++) {
-        for(int j=0; j<4; j++) {
+    for(i=0; i<4; i++) {
+        for(j=0; j<4; j++) {
             PlainText[i][j] = reverse(PlainText_16[j*4+i]);
             Key[i][j] = reverse(Key_16[j*4+i]);
             PlainText[i][j] = PlainText_16[j*4+i];
@@ -56,17 +57,16 @@ void encrypt(unsigned char PlainText_16[16], unsigned char Key_16[16], unsigned 
     unsigned char StateArray [4][4];
     unsigned char ExpandedKey[11][4][4];
     unsigned char TempKeyCol[4];
-    //static int i,j;
 
     // Encryption Key copied to Expanded Key [0]
-    for(int i=0; i<4; i++) {
-        for(int j=0; j<4; j++) {
+    for(i=0; i<4; i++) {
+        for(j=0; j<4; j++) {
             ExpandedKey[0][i][j] = Key[i][j];
         }
     }
 
     //	ExpandKey(Key, ExpandedKey);
-    for (int i=1; i<11; i++) {
+    for (i=1; i<11; i++) {
         // W3 copied to TempKeyRow with rotation
         TempKeyCol[0]=ExpandedKey[i-1][1][3];
         TempKeyCol[1]=ExpandedKey[i-1][2][3];
@@ -83,7 +83,7 @@ void encrypt(unsigned char PlainText_16[16], unsigned char Key_16[16], unsigned 
         TempKeyCol[0]^=RCon[i-1];
 
         // XOR
-        for(int j=0; j<4; j++) {
+        for(j=0; j<4; j++) {
             TempKeyCol[0] = TempKeyCol[0]^ExpandedKey[i-1][0][j];
             TempKeyCol[1] = TempKeyCol[1]^ExpandedKey[i-1][1][j];
             TempKeyCol[2] = TempKeyCol[2]^ExpandedKey[i-1][2][j];
@@ -96,22 +96,22 @@ void encrypt(unsigned char PlainText_16[16], unsigned char Key_16[16], unsigned 
         }
     }
 
-    for(int i=0; i<4; i++) {
-        for(int j=0; j<4; j++) {
+    for(i=0; i<4; i++) {
+        for(j=0; j<4; j++) {
             StateArray[i][j] = PlainText[i][j];
         }
     }
 
     //	AddRoundKey(ExpandedKey[0], StateArray);
-    for(int i=0; i<4; i++)
+    for(i=0; i<4; i++)
         for(int j=0; j<4; j++)
             StateArray[i][j] ^= ExpandedKey[0][i][j];
 
     // Rounds
     for(int r=1; r<=10; r++) {
         //		SubBytes(StateArray);
-        for(int i=0; i<4; i++)
-            for(int j=0; j<4; j++)
+        for(i=0; i<4; i++)
+            for(j=0; j<4; j++)
                 StateArray[i][j] = SBox[StateArray[i][j]];
 
         //		ShiftRows(StateArray);
@@ -140,7 +140,7 @@ void encrypt(unsigned char PlainText_16[16], unsigned char Key_16[16], unsigned 
             //			MixColumns(StateArray);
             unsigned char StateArrayTmp[4][4];
 
-            for(int i=0; i<4; i++) {
+            for(i=0; i<4; i++) {
                 StateArrayTmp[0][i] =
                     xTime(StateArray[0][i])^xTime(StateArray[1][i])^StateArray[1][i]^
                     StateArray[2][i]^StateArray[3][i];
@@ -156,28 +156,28 @@ void encrypt(unsigned char PlainText_16[16], unsigned char Key_16[16], unsigned 
             }
 
             //			memcpy(StateArray, StateArrayTmp, 4 * 4 * sizeof(unsigned char));
-            for(int i=0; i<4; i++) {
-                for(int j=0; j<4; j++) {
+            for(i=0; i<4; i++) {
+                for(j=0; j<4; j++) {
                     StateArray[i][j] = StateArrayTmp[i][j];
                 }
             }
         }
 
         //		AddRoundKey(ExpandedKey[i], StateArray);
-        for(int i=0; i<4; i++)
-            for(int j=0; j<4; j++)
+        for(i=0; i<4; i++)
+            for(j=0; j<4; j++)
                 StateArray[i][j] ^= ExpandedKey[r][i][j];
     }
 
-    for(int i=0; i<4; i++) {
-        for(int j=0; j<4; j++) {
+    for(i=0; i<4; i++) {
+        for(j=0; j<4; j++) {
             CipherText[i][j] = StateArray[i][j];
         }
     }
 
     //set it back to the output
-    for(int i=0; i<4; i++) {
-        for(int j=0; j<4; j++) {
+    for(i=0; i<4; i++) {
+        for(j=0; j<4; j++) {
             CipherText_16[j*4+i] = CipherText[i][j];
         }
     }
