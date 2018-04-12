@@ -128,20 +128,39 @@ void g_counter_mode_encrypt(unsigned char *J, unsigned char *plaintext, size_t p
         }
     }
 }
-void ghash(unsigned char *J, unsigned char *plaintext, unsigned int plaintext_length, unsigned char *Y){
+/*void ghash(unsigned char *J, unsigned char *text, unsigned int text_length, unsigned char *Y){
 	memset(Y, 0, 16);
 	unsigned int i;
 	unsigned char sub[16];
-	for(i = 0; i < plaintext_length; i+=16){
+	printf("%d\r\n",text_length);
+	for(i = 0; i < text_length; i+=16){
 		memcpy(sub,J,16);
+		AES_PRINT(sub);
 		gf_xor(sub,Y);
-		gf_mult(sub,&plaintext[i],Y);
+		AES_PRINT(sub);
+		gf_mult(sub,&text[i],Y);
+		AES_PRINT(Y);
+		gf_mult(sub,&text[i],Y);
 		inc32(J);
-		//cur = gdot(J,&plaintext[i], 16);
-
 	}
-
+}*/
+void ghash(unsigned char *J, unsigned char *text, unsigned int text_length, unsigned char *Y){
+	memset(Y, 0, 16);
+	unsigned int i;
+	unsigned char sub[16];
+	printf("%d\r\n",text_length);
+	for(i = 0; i < text_length; i+=16){
+		memcpy(sub,J,16);
+		AES_PRINT(sub);
+		gf_xor(sub,Y);
+		AES_PRINT(sub);
+		gf_mult(sub,&text[i],Y);
+		AES_PRINT(Y);
+		gf_mult(sub,&text[i],Y);
+		inc32(J);
+	}
 }
+
 
 void g_counter_mode_encrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigned char *plaintext, size_t plaintext_length,
         unsigned char *aad, size_t aad_len, unsigned char *ciphertext, unsigned char *tag)
@@ -165,8 +184,15 @@ void g_counter_mode_encrypt_and_authenticate(unsigned char *key, unsigned char *
     // for whatever reason increment so the count is 2 before you start
     inc32(&(J[12]));
     // do the encryption
+    printf("P - ");
+    AES_PRINT(plaintext);
     g_counter_mode_encrypt(J, plaintext, plaintext_length, key, ciphertext);
+    printf("E(K,Y) - ");
+    AES_PRINT(ciphertext);
     // do the hash
+    printf("H - ");
+    AES_PRINT(H_key);
+
     ghash(H_key, ciphertext, plaintext_length, X);
     printf("GHASH - ");
     AES_PRINT(X);
