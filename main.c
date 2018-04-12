@@ -47,11 +47,12 @@ unsigned char Z2[16] = {0xf3, 0x8c, 0xbb, 0x1a, 0xd6, 0x92, 0x23, 0xdc, 0xc3, 0x
 unsigned char X3[16] = {0xba, 0x47, 0x1e, 0x04, 0x9d, 0xa2, 0x0e, 0x40, 0x49, 0x5e, 0x28, 0xe5, 0x8c, 0xa8, 0xc5, 0x55};
 unsigned char Y3[16] = {0xb8, 0x3b, 0x53, 0x37, 0x08, 0xbf, 0x53, 0x5d, 0x0a, 0xa6, 0xe5, 0x29, 0x80, 0xd5, 0x3b, 0x78};
 unsigned char Z3[16] = {0xb7, 0x14, 0xc9, 0x04, 0x83, 0x89, 0xaf, 0xd9, 0xf9, 0xbc, 0x5c, 0x1d, 0x43, 0x78, 0xe0, 0x52};
-int i,j;
+
 
 
 void AES_PRINT(unsigned char * array_ptr) {
     printf("HEX:");
+    int i;
     for (i=0; i<16; i++) {
         printf(" 0x%02x", array_ptr[i]);
     }
@@ -72,6 +73,7 @@ void inc32(unsigned char *v)
 void gf_rightshift(unsigned char *v)
 {
     //right to left
+	int i;
     for (i = 15; i > 0; i--) {
         v[i] = (v[i] >> 1) | (v[i-1] << 7);
     }
@@ -80,6 +82,7 @@ void gf_rightshift(unsigned char *v)
 
 void gf_xor(unsigned char *z, unsigned char *v)
 {
+	int i;
     for (i = 0; i < 16; i++) {
         z[i] = z[i] ^ v[i];
     }
@@ -89,6 +92,7 @@ void gf_mult(const unsigned char *x, const unsigned char *y, unsigned char *z)
 {
     //FOLLOWING STRAIGHT FROM THE PSEUDOCODE ON PAGE 9
     unsigned char v[16];
+    int i,j;
 
     for (i = 0; i < 16; i++) {
         z[i] = 0; // set z to zero
@@ -99,7 +103,7 @@ void gf_mult(const unsigned char *x, const unsigned char *y, unsigned char *z)
     // says 0 to 127 but were chunking into bytes
     for (i = 0; i < 16; i++) {
         // we're going left to right so 7 to 0
-        for (int j = 7; j >= 0; j--) {
+        for (j = 7; j >= 0; j--) {
             //IF Y_I = 1 THEN
             if (y[i] & 1 << j) {
                 //Z <-- Z XOR V
@@ -122,7 +126,9 @@ void gf_mult(const unsigned char *x, const unsigned char *y, unsigned char *z)
                 v[0] = v[0] ^ 0xe1;
             }
             //END IF
+
         }
+        //printf("looping %d %d\r\n",i,j);
     }
     //END FOR
     //RETURN Z
@@ -134,6 +140,7 @@ void init_hash_key(unsigned char *key, unsigned char *H)
 {
     //hash key is just the encryption of all zeros
     unsigned char temp[16];
+    int i;
     for (i = 0; i < 16; i++) {
         temp[i] = 0; // set H to zero
     }
@@ -142,6 +149,7 @@ void init_hash_key(unsigned char *key, unsigned char *H)
 
 void init_j(unsigned char *iv, unsigned char *J)
 {
+	int i;
     //set the first 96 bits to iv
     for (i=0; i<12; i++) {
         J[i] = iv[i];
@@ -158,7 +166,7 @@ void g_counter_mode_encrypt(unsigned char *J, unsigned char *plaintext, size_t p
 {
     if (plaintext_length == 0)
         return;
-
+    int i;
     int blocks = plaintext_length / 16;
 
     for (i = 0; i < blocks; i++) {

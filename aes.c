@@ -23,7 +23,7 @@ const unsigned char SBox[256] = {
 const unsigned char RCon[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36};
 
 #define xTime(x) ((x<<1) ^ ((x & 0x080) ? 0x1b : 0x00))
-int i,j;
+int i,j,r;
 
 unsigned char reverse(unsigned char b) {
    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
@@ -104,11 +104,11 @@ void encrypt(unsigned char PlainText_16[16], unsigned char Key_16[16], unsigned 
 
     //	AddRoundKey(ExpandedKey[0], StateArray);
     for(i=0; i<4; i++)
-        for(int j=0; j<4; j++)
+        for(j=0; j<4; j++)
             StateArray[i][j] ^= ExpandedKey[0][i][j];
 
     // Rounds
-    for(int r=1; r<=10; r++) {
+    for(r=1; r<=10; r++) {
         //		SubBytes(StateArray);
         for(i=0; i<4; i++)
             for(j=0; j<4; j++)
