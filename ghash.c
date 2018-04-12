@@ -145,18 +145,17 @@ void g_counter_mode_encrypt(unsigned char *J, unsigned char *plaintext, size_t p
 	}
 }*/
 void ghash(unsigned char *J, unsigned char *text, unsigned int text_length, unsigned char *Y){
-	memset(Y, 0, 16);
 	unsigned int i;
 	unsigned char sub[16];
 	printf("%d\r\n",text_length);
 	for(i = 0; i < text_length; i+=16){
 		memcpy(sub,J,16);
-		AES_PRINT(sub);
+		//AES_PRINT(sub);
 		gf_xor(sub,Y);
-		AES_PRINT(sub);
+		//AES_PRINT(sub);
 		gf_mult(sub,&text[i],Y);
-		AES_PRINT(Y);
-		gf_mult(sub,&text[i],Y);
+		//AES_PRINT(Y);
+		//gf_mult(sub,&text[i],Y);
 		inc32(J);
 	}
 }
@@ -193,6 +192,8 @@ void g_counter_mode_encrypt_and_authenticate(unsigned char *key, unsigned char *
     printf("H - ");
     AES_PRINT(H_key);
 
+	memset(X, 0, 16);
+    ghash(H_key, aad, aad_len, X);
     ghash(H_key, ciphertext, plaintext_length, X);
     printf("GHASH - ");
     AES_PRINT(X);
