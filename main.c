@@ -2,6 +2,7 @@
 #include "string.h"
 #include "aes.h"
 #include "ghash.h"
+#include "debug.h"
 
 /*
 unsigned char Key[16]        =
@@ -58,14 +59,6 @@ unsigned char Z3[16] = {0xb7, 0x14, 0xc9, 0x04, 0x83, 0x89, 0xaf, 0xd9, 0xf9, 0x
 
 
 
-void AES_PRINT(unsigned char * array_ptr) {
-    printf("HEX:");
-    int i;
-    for (i=0; i<16; i++) {
-        printf(" 0x%02x", array_ptr[i]);
-    }
-    puts("");
-}
 
 
 
@@ -92,9 +85,10 @@ int main() {
 
     puts("");
     puts("ENCRYPTION TEST");
-    unsigned char aad[1234];
-    unsigned char Tag[1234];
-    unsigned char CipherText[1234];
+    unsigned char aad[64];
+    unsigned char Tag[16];
+    unsigned char CipherText[64];
+    memset(aad, 0, 64);
     g_counter_mode_encrypt_and_authenticate(Key, IV, PlainText, sizeof (PlainText),
                                             aad, sizeof (aad), CipherText, Tag);
     printf("CIPHER - ");

@@ -1,4 +1,5 @@
 #include "ghash.h"
+#include "debug.h"
 void inc32(unsigned char *v)
 {
     //convert it to an int and then increment it
@@ -145,18 +146,33 @@ void g_counter_mode_encrypt(unsigned char *J, unsigned char *plaintext, size_t p
 	}
 }*/
 void ghash(unsigned char *J, unsigned char *text, unsigned int text_length, unsigned char *Y){
-	unsigned int i;
+	unsigned int i,j;
 	unsigned char sub[16];
-	printf("%d\r\n",text_length);
+	unsigned char subtext[16];
+	unsigned char cur;
+	printf("%d %d\r\n",text_length, sizeof(text));
 	for(i = 0; i < text_length; i+=16){
-		memcpy(sub,J,16);
+        //sub = J;
+        for(j = 0; j < 16; j++)
+            sub[j] = J[j];
+		//memcpy(sub,J,16);
+        for(j = 0; j < 16; j++){
+            //printf("%d\r\n", text[j+i]);
+            subtext[j] = text[j+i];
+        }
+		//memcpy(subtext, &text[i],16);
+
 		//AES_PRINT(sub);
+		//AES_PRINT(subtext);
+
 		gf_xor(sub,Y);
-		//AES_PRINT(sub);
-		gf_mult(sub,&text[i],Y);
-		//AES_PRINT(Y);
+        AES_PRINT(sub);
+        AES_PRINT(subtext);
+		gf_mult(sub,subtext,Y);
+		AES_PRINT(Y);
+        printf("\r\n");
 		//gf_mult(sub,&text[i],Y);
-		inc32(J);
+        inc32(&(J[12]));
 	}
 }
 
@@ -193,7 +209,8 @@ void g_counter_mode_encrypt_and_authenticate(unsigned char *key, unsigned char *
     AES_PRINT(H_key);
 
 	memset(X, 0, 16);
-    ghash(H_key, aad, aad_len, X);
+    memcpy(X,aad,16);
+    ghash(H_key, &aad[16], aad_len - 16, X);
     ghash(H_key, ciphertext, plaintext_length, X);
     printf("GHASH - ");
     AES_PRINT(X);
