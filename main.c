@@ -91,7 +91,7 @@ int main() {
 
     unsigned char OUT[16];
 
-    /*puts("GF MULT TEST 1");
+    puts("GF MULT TEST 1");
     gf_mult(X1, Y1, OUT);
     AES_PRINT(OUT);
     AES_PRINT(Z1);
@@ -106,7 +106,7 @@ int main() {
     puts("GF MULT TEST 3");
     gf_mult(X3, Y3, OUT);
     AES_PRINT(OUT);
-    AES_PRINT(Z3);*/
+    AES_PRINT(Z3);
 
     puts("");
     puts("ENCRYPTION TEST");

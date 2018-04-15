@@ -110,13 +110,11 @@ void init_j(unsigned char *iv, unsigned char *H)
 
 void g_counter_mode_encrypt(unsigned char *H, unsigned char *plaintext, size_t plaintext_length, unsigned char key[16], unsigned char *ciphertext)
 {
-    int i;
+    size_t i;
 
     if (plaintext_length == 0)
         return;
-    int blocks = plaintext_length / 16;
-    printf("blocks: %d %d", blocks, plaintext_length);
-
+    size_t blocks = plaintext_length / 16;
     for (i = 0; i < blocks; i++) {
         //increment the counter
         inc32(&(H[12]));
@@ -124,7 +122,6 @@ void g_counter_mode_encrypt(unsigned char *H, unsigned char *plaintext, size_t p
         encrypt(H, key, &(ciphertext[i*16]));
         //then xor the output with the plaintext to get the cipher text
         gf_xor(&(ciphertext[i*16]), &(plaintext[i*16]));
-        printf("\r\n%d",i);
     }
     if(plaintext_length > blocks * 16){
         unsigned char extend[16];
@@ -148,15 +145,13 @@ void g_counter_mode_encrypt(unsigned char *H, unsigned char *plaintext, size_t p
         }
     }*/
 }
-void ghash(unsigned char *H, unsigned char *A, unsigned long A_len, unsigned char *C, unsigned long C_len, unsigned char *X, unsigned char *key, unsigned char *iv){
+void ghash(unsigned char *H, unsigned char *A, unsigned long A_len, unsigned char *C, unsigned long C_len, unsigned char *X){
 	memset(X, 0, 16);
     unsigned int i,j;
 	unsigned char temp[16];
 	unsigned char subtext[16];
-	unsigned char cur;
     memset(temp, 0, 16);
-    i = 0;
-	do{
+	for(i = 0; i < A_len; i+=16){
         for(j = 0; j < 16; j++){
             if(i + j < A_len){
             subtext[j] = A[j+i];
@@ -166,16 +161,8 @@ void ghash(unsigned char *H, unsigned char *A, unsigned long A_len, unsigned cha
         }
 		gf_xor(subtext,temp);
 		gf_mult(H,subtext,temp);
-        printf("X - ");
-        AES_PRINT(temp);
-        i+=16;
-	}while(i < A_len);
-    
-    printf("AX - ");
-    AES_PRINT(temp);
+	}
 	for(i = 0; i < C_len; i+=16){
-        printf("cur - ");
-        AES_PRINT(&C[i]);
         for(j = 0; j < 16; j++){
             if(i + j < C_len){
                 subtext[j] = C[j+i];
@@ -183,16 +170,12 @@ void ghash(unsigned char *H, unsigned char *A, unsigned long A_len, unsigned cha
                 subtext[j] = 0;
             }
         }
-        AES_PRINT(subtext);
 		gf_xor(subtext,temp);
 		gf_mult(H,subtext,temp);
-        printf("X - ");
-        AES_PRINT(temp);
 	}
     memcpy(X, temp, 16);
     ConstructArray(temp, A_len * 8);
     ConstructArray(&temp[8], C_len * 8);
-    AES_PRINT(temp);
     gf_xor(temp,X);
     gf_mult(temp,H,X);
 }
@@ -228,7 +211,7 @@ void g_counter_mode_encrypt_and_authenticate(unsigned char *key, unsigned char *
     printf("H - ");
     AES_PRINT(H_key);
 
-    ghash(H_key, aad, aad_len, ciphertext, plaintext_length, X, key, iv);
+    ghash(H_key, aad, aad_len, ciphertext, plaintext_length, X);
 
     printf("GHASH - ");
     AES_PRINT(X);
