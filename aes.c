@@ -1,4 +1,4 @@
-
+#include "debug.h"
 const unsigned char SBox[256] = {
     // 0     1     2     3     4     5     6     7     8     9     A     B     C     D     E     F
     0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,   //0
@@ -181,4 +181,16 @@ void encrypt(unsigned char PlainText_16[16], unsigned char Key_16[16], unsigned 
             CipherText_16[j*4+i] = CipherText[i][j];
         }
     }
+}
+
+void ConstructArray(unsigned char *a, unsigned long val)
+{
+	a[0] = val >> 56;
+	a[1] = val >> 48;
+	a[2] = val >> 40;
+	a[3] = val >> 32;
+	a[4] = val >> 24;
+	a[5] = val >> 16;
+	a[6] = val >> 8;
+	a[7] = val & 0xff;
 }
