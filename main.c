@@ -3,8 +3,9 @@
 #include "aes.h"
 #include "ghash.h"
 #include "debug.h"
+#include "gunits.h"
 
-#define TEST 1
+#define TEST 0
 
 #if TEST == 0
 unsigned char Key[16]        =
@@ -26,7 +27,15 @@ unsigned char PlainText[16]  =
     0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00
 };
-unsigned char aad[0];
+unsigned char aad;
+Message message = {
+    &aad,
+    0,
+    &IV,
+    12,
+    &PlainText,
+    16
+};
 #elif TEST == 1
 
 unsigned char Key[16]        =
@@ -41,7 +50,16 @@ unsigned char PlainText[64]  =
     0x1c, 0x3c, 0x0c, 0x95, 0x95, 0x68, 0x09, 0x53, 0x2f, 0xcf, 0x0e, 0x24, 0x49, 0xa6, 0xb5, 0x25,
     0xb1, 0x6a, 0xed, 0xf5, 0xaa, 0x0d, 0xe6, 0x57, 0xba, 0x63, 0x7b, 0x39, 0x1a, 0xaf, 0xd2, 0x55
 };
-unsigned char aad[0];
+unsigned char aad;
+Message message = {
+    &aad,
+    0,
+    &IV,
+    12,
+    &PlainText,
+    64
+};
+
 #elif TEST == 2
 
 unsigned char Key[16]        =
@@ -60,13 +78,15 @@ unsigned char aad[20] = {
      0xfe, 0xed, 0xfa, 0xce, 0xde, 0xad, 0xbe, 0xef, 0xfe, 0xed, 0xfa, 0xce, 0xde, 0xad, 0xbe, 0xef, 
      0xab, 0xad, 0xda, 0xd2 
 };
+Message message = {
+    &aad,
+    20,
+    &IV,
+    12,
+    &PlainText,
+    60
+};
 #endif
-/*unsigned char Key[16] =
-{
-    0xfe, 0xff, 0xe9, 0x92, 0x86, 0x65, 0x73, 0x1c, 0x6d, 0x6a, 0x8f, 0x94, 0x67, 0x30, 0x83, 0x08
-}*/
-
-//unsigned char IV
 
 
 
@@ -87,7 +107,7 @@ unsigned char Z3[16] = {0xb7, 0x14, 0xc9, 0x04, 0x83, 0x89, 0xaf, 0xd9, 0xf9, 0x
 
 
 
-int main() {
+int mainold() {
 
     unsigned char OUT[16];
 
@@ -123,5 +143,39 @@ int main() {
     AES_PRINT(CipherText+32);
     printf("CIPHER - ");
     AES_PRINT(CipherText+48);
+    return 0;
+}
+int main() {
+
+    unsigned char OUT[16];
+
+    puts("GF MULT TEST 1");
+    gf_mult(X1, Y1, OUT);
+    AES_PRINT(OUT);
+    AES_PRINT(Z1);
+
+    puts("");
+    puts("GF MULT TEST 2");
+    gf_mult(X2, Y2, OUT);
+    AES_PRINT(OUT);
+    AES_PRINT(Z2);
+
+    puts("");
+    puts("GF MULT TEST 3");
+    gf_mult(X3, Y3, OUT);
+    AES_PRINT(OUT);
+    AES_PRINT(Z3);
+
+    puts("");
+    puts("ENCRYPTION TEST");
+    PrintMessage(message.Data, message.DataLength);
+
+    EncyptedMessage encryptedMessage = *newEncyptedMessage(message.HeaderLength, message.SeqLength, message.DataLength, 16);
+    g_counter_mode_encrypt_and_authenticate(Key, message.Seq, message.Data, message.DataLength,
+                                            message.Header, message.HeaderLength, encryptedMessage.Data, encryptedMessage.ICV);
+    puts("ENCRYPTED DATA");
+    PrintMessage(encryptedMessage.Data, encryptedMessage.DataLength);
+    puts("AUTH TAG");
+    PrintMessage(encryptedMessage.ICV, encryptedMessage.ICVLength);
     return 0;
 }
