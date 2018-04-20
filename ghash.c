@@ -107,82 +107,45 @@ void init_j(unsigned char *iv, unsigned char *H)
     H[15] = 0x01;
 }
 
-
-void g_counter_mode_encrypt(unsigned char *H, unsigned char *plaintext, size_t plaintext_length, unsigned char key[16], unsigned char *ciphertext)
-{
-    size_t i;
-
-    if (plaintext_length == 0)
-        return;
-    size_t blocks = plaintext_length / 16;
-    for (i = 0; i < blocks; i++) {
-        //increment the counter
-        inc32(&(H[12]));
-        //encrypt the iv+count
-        encrypt(H, key, &(ciphertext[i*16]));
-        //then xor the output with the plaintext to get the cipher text
-        gf_xor(&(ciphertext[i*16]), &(plaintext[i*16]));
-    }
-    if(plaintext_length > blocks * 16){
-        unsigned char extend[16];
-        memcpy(extend, &plaintext[(blocks) * 16], (plaintext_length - blocks*16));
-        memset(&extend[plaintext_length - blocks*16], 0,16 - (plaintext_length - blocks*16));
-        //increment the counter
-        inc32(&(H[12]));
-        //encrypt the iv+count
-        encrypt(H, key, &(ciphertext[i*16]));
-        //then xor the output with the plaintext to get the cipher text
-        gf_xor(&(ciphertext[i*16]), extend);
-    }
-
-    //if theres an unfull block...
-    /*int remainder = plaintext_length % 16;
-    if (remainder != 0) {
-        unsigned char temp[16];
-        encrypt(H, key, temp);
-        for (i = 0; i < remainder; i++) {
-            ciphertext[(blocks-1)*16 + i] =  plaintext[(blocks-1)*16 + i] ^ temp[i];
-        }
-    }*/
-}
-void ghash(unsigned char *H, unsigned char *A, unsigned long A_len, unsigned char *C, unsigned long C_len, unsigned char *X){
-	memset(X, 0, 16);
+void init_ghash_aad(unsigned char *H, unsigned char *aad, unsigned long long aad_len, unsigned char *tag){
+    memset(tag, 0, 16);
     unsigned int i,j;
-	unsigned char temp[16];
 	unsigned char subtext[16];
-    memset(temp, 0, 16);
-	for(i = 0; i < A_len; i+=16){
+	for(i = 0; i < aad_len; i+=16){
         for(j = 0; j < 16; j++){
-            if(i + j < A_len){
-            subtext[j] = A[j+i];
+            if(i + j < aad_len){
+            subtext[j] = aad[j+i];
             }else{
                 subtext[j] = 0;
             }
         }
-		gf_xor(subtext,temp);
-		gf_mult(H,subtext,temp);
+		gf_xor(subtext,tag);
+		gf_mult(H,subtext,tag);
 	}
-	for(i = 0; i < C_len; i+=16){
-        for(j = 0; j < 16; j++){
-            if(i + j < C_len){
-                subtext[j] = C[j+i];
-            }else{
-                subtext[j] = 0;
-            }
-        }
-		gf_xor(subtext,temp);
-		gf_mult(H,subtext,temp);
-	}
-    memcpy(X, temp, 16);
-    ConstructArray(temp, A_len * 8);
+}
+void init_ghash_cycle(unsigned char *H, unsigned char *C, unsigned long C_len, unsigned char *tag){
+    int j;
+	unsigned char subtext[16];
+    memset(subtext, 0, sizeof(subtext));
+    for(j = 0; j < C_len; j++){
+        subtext[j] = C[j];
+    }
+    gf_xor(subtext,tag);
+    gf_mult(H,subtext,tag);
+}
+void end_ghash_cycle(unsigned char *H, unsigned long long aad_len, unsigned long C_len, unsigned char *tag){
+	unsigned char temp[16]; 
+    ConstructArray(temp, aad_len * 8);
     ConstructArray(&temp[8], C_len * 8);
-    gf_xor(temp,X);
-    gf_mult(temp,H,X);
+    gf_xor(temp,tag);
+    gf_mult(temp,H,tag);
 }
 
-void g_counter_mode_encrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigned char *plaintext, size_t plaintext_length,
-        unsigned char *aad, size_t aad_len, unsigned char *ciphertext, unsigned char *tag)
-{
+
+void gcm_encrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigned char *plaintext, unsigned long long plaintext_length,
+        unsigned char *aad, unsigned long long aad_len, unsigned char *ciphertext, unsigned char *tag){
+    unsigned int i;
+    unsigned int blocks = plaintext_length / 16;
     unsigned char H_key[16]; // the hash key
     unsigned char H[16]; // the iv+counter that we encrypt
     unsigned char X[16]; // hash input (A, C, len(A), len(c)
@@ -196,30 +159,49 @@ void g_counter_mode_encrypt_and_authenticate(unsigned char *key, unsigned char *
     AES_PRINT(H_key);
     // initialize H, the iv+counter
     init_j(iv, H);
+    encrypt(H, key, tag);
 
     printf("IV - ");
     AES_PRINT(H);
-    // for whatever reason increment so the count is 2 before you start
-    //inc32(&(H[12]));
-    // do the encryption
+    
     printf("P - ");
     AES_PRINT(plaintext);
-    g_counter_mode_encrypt(H, plaintext, plaintext_length, key, ciphertext);
+    
+/**************************************************/
+    init_ghash_aad(H_key, aad, aad_len,X);
+    for (i = 0; i < blocks; i++) {
+        //increment the counter
+        inc32(&(H[12]));
+        //encrypt the iv+count
+        encrypt(H, key, &(ciphertext[i*16]));
+        //then xor the output with the plaintext to get the cipher text
+        gf_xor(&(ciphertext[i*16]), &(plaintext[i*16]));
+        init_ghash_cycle(H_key, &ciphertext[i*16], 16,X);\
+    }
+    if(plaintext_length > blocks * 16){
+        unsigned char extend[16];
+        memcpy(extend, &plaintext[(blocks) * 16], (plaintext_length - blocks*16));
+        memset(&extend[plaintext_length - blocks*16], 0,16 - (plaintext_length - blocks*16));
+        //increment the counter
+        inc32(&(H[12]));
+        //encrypt the iv+count
+        encrypt(H, key, &(ciphertext[i*16]));
+        //then xor the output with the plaintext to get the cipher text
+        gf_xor(&(ciphertext[i*16]), extend);
+        init_ghash_cycle(H_key, &ciphertext[i*16], (plaintext_length - blocks*16), X);\
+    }
+    end_ghash_cycle(H_key, aad_len, plaintext_length, &X);
+    gf_xor(tag, X); //final tag step
+
     printf("E(K,Y) - ");
     AES_PRINT(ciphertext);
-    // do the hash
+    
     printf("H - ");
     AES_PRINT(H_key);
 
-    ghash(H_key, aad, aad_len, ciphertext, plaintext_length, X);
-
     printf("GHASH - ");
     AES_PRINT(X);
-    //reset H for the tag
-    init_j(iv, H);
-    //get the tag
-    encrypt(H, key, tag);
-    gf_xor(tag, X);
+    
     printf("TAG - ");
-    AES_PRINT(tag);
+    AES_PRINT(tag); 
 }

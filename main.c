@@ -105,46 +105,6 @@ unsigned char Z3[16] = {0xb7, 0x14, 0xc9, 0x04, 0x83, 0x89, 0xaf, 0xd9, 0xf9, 0x
 
 
 
-
-
-int mainold() {
-
-    unsigned char OUT[16];
-
-    puts("GF MULT TEST 1");
-    gf_mult(X1, Y1, OUT);
-    AES_PRINT(OUT);
-    AES_PRINT(Z1);
-
-    puts("");
-    puts("GF MULT TEST 2");
-    gf_mult(X2, Y2, OUT);
-    AES_PRINT(OUT);
-    AES_PRINT(Z2);
-
-    puts("");
-    puts("GF MULT TEST 3");
-    gf_mult(X3, Y3, OUT);
-    AES_PRINT(OUT);
-    AES_PRINT(Z3);
-
-    puts("");
-    puts("ENCRYPTION TEST");
-    unsigned char Tag[16];
-    unsigned char CipherText[64];
-    //memset(aad, 0, 0);
-    g_counter_mode_encrypt_and_authenticate(Key, IV, PlainText, sizeof (PlainText),
-                                            aad, sizeof (aad), CipherText, Tag);
-    printf("CIPHER - ");
-    AES_PRINT(CipherText);
-    printf("CIPHER - ");
-    AES_PRINT(CipherText+16);
-    printf("CIPHER - ");
-    AES_PRINT(CipherText+32);
-    printf("CIPHER - ");
-    AES_PRINT(CipherText+48);
-    return 0;
-}
 int main() {
 
     unsigned char OUT[16];
@@ -171,7 +131,9 @@ int main() {
     PrintMessage(message.Data, message.DataLength);
 
     EncyptedMessage encryptedMessage = *newEncyptedMessage(message.HeaderLength, message.SeqLength, message.DataLength, 16);
-    g_counter_mode_encrypt_and_authenticate(Key, message.Seq, message.Data, message.DataLength,
+    //g_counter_mode_encrypt_and_authenticate(Key, message.Seq, message.Data, message.DataLength,
+    //                                        message.Header, message.HeaderLength, encryptedMessage.Data, encryptedMessage.ICV);
+    gcm_encrypt_and_authenticate(Key, message.Seq, message.Data, message.DataLength,
                                             message.Header, message.HeaderLength, encryptedMessage.Data, encryptedMessage.ICV);
     puts("ENCRYPTED DATA");
     PrintMessage(encryptedMessage.Data, encryptedMessage.DataLength);
