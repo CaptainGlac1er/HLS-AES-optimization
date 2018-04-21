@@ -1,8 +1,10 @@
-void gf_rightshift(unsigned char *v)
+void gf_rightshift(unsigned char v[16])
 {
+#pragma HLS inline
     //right to left
 	int i;
     for (i = 15; i > 0; i--) {
+#pragma HLS unroll
         v[i] = (v[i] >> 1) | (v[i-1] << 7);
     }
     v[0] = (v[0] >> 1);
@@ -12,21 +14,25 @@ void gf_rightshift(unsigned char *v)
  * v second array
  * z is output 
  */
-void gf_xor(unsigned char *z, unsigned char *v)
+void gf_xor(unsigned char z[16], unsigned char v[16])
 {
+#pragma HLS inline
 	int i;
     for (i = 0; i < 16; i++) {
+#pragma HLS unroll
         z[i] = z[i] ^ v[i];
     }
 }
 
-void gf_mult(const unsigned char *x, const unsigned char *y, unsigned char *z)
+void gf_mult(const unsigned char x[16], const unsigned char y[16], unsigned char z[16])
 {
+#pragma HLS inline
     //FOLLOWING STRAIGHT FROM THE PSEUDOCODE ON PAGE 9
     unsigned char v[16];
     int i,j;
 
     for (i = 0; i < 16; i++) {
+#pragma HLS unroll
         z[i] = 0; // set z to zero
         v[i] = x[i]; // set v to x
     }
@@ -34,6 +40,7 @@ void gf_mult(const unsigned char *x, const unsigned char *y, unsigned char *z)
     //FOR I=0 TO 127 DO
     // says 0 to 127 but were chunking into bytes
     for (i = 0; i < 16; i++) {
+#pragma HLS unroll region
         // we're going left to right so 7 to 0
         for (j = 7; j >= 0; j--) {
             //IF Y_I = 1 THEN

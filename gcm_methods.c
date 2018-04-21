@@ -1,8 +1,9 @@
 #include "gcm_methods.h"
 #include "aes.h"
 
-void inc32(unsigned char *v)
+void inc32(unsigned char v[4])
 {
+#pragma HLS inline
     //convert it to an int and then increment it
     int temp = (v[0] << 24) | (v[1] << 16) | (v[2] << 8) | v[3];
     temp++;
@@ -12,22 +13,26 @@ void inc32(unsigned char *v)
     v[0] = (temp >> 24) & 0xff;
 }
 
-void init_hash_key(unsigned char *key, unsigned char *H)
+void init_hash_key(unsigned char key[16], unsigned char H[16])
 {
     //hash key is just the encryption of all zeros
     unsigned char temp[16];
     int i;
     for (i = 0; i < 16; i++) {
+#pragma HLS UNROLL
         temp[i] = 0; // set H to zero
     }
     encrypt(temp, key, H);
 }
 
-void init_j(unsigned char *iv, unsigned char *H)
+void init_j(unsigned char iv[12], unsigned char H[16])
 {
+#pragma HLS inline
 	int i;
     //set the first 96 bits to iv
     for (i=0; i<12; i++) {
+    	//unroll was better than pipeline here. A little more resources but half the time.
+#pragma HLS UNROLL
         H[i] = iv[i];
     }
     // then init the counter with 1
@@ -37,8 +42,9 @@ void init_j(unsigned char *iv, unsigned char *H)
     H[15] = 0x01;
 }
 
-void ConstructArray(unsigned char *a, unsigned long long val)
+void ConstructArray(unsigned char a[16], unsigned long long val)
 {
+#pragma HLS inline
 	a[0] = val >> 56;
 	a[1] = val >> 48;
 	a[2] = val >> 40;
