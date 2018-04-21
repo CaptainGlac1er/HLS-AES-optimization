@@ -10,7 +10,6 @@ OBJECTS = $(SOURCES:.c=.o)
 # Main target
 $(EXEC): $(OBJECTS) 
 	$(CC) $(OBJECTS) -o $(ODIR)/$(EXEC) $(LDFLAGS)
-	make clean
  
 # To obtain object files
 %.o: %.c
