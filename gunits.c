@@ -1,5 +1,7 @@
 #include "gunits.h"
 #include "debug.h"
+#include "stdio.h"
+#include <stdlib.h>
 
 void PrintMessage(unsigned char *message, unsigned long length){
     unsigned int i,j;

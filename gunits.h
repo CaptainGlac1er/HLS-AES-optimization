@@ -1,3 +1,4 @@
+
 typedef struct Message{
     unsigned char *Header;
     unsigned long HeaderLength;

@@ -124,7 +124,7 @@ void init_ghash_aad(unsigned char *H, unsigned char *aad, unsigned long long aad
 	}
 }
 void init_ghash_cycle(unsigned char *H, unsigned char *C, unsigned long C_len, unsigned char *tag){
-    int j;
+    unsigned int j;
 	unsigned char subtext[16];
     memset(subtext, 0, sizeof(subtext));
     for(j = 0; j < C_len; j++){
@@ -149,23 +149,13 @@ void gcm_encrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigne
     unsigned char H_key[16]; // the hash key
     unsigned char H[16]; // the iv+counter that we encrypt
     unsigned char X[16]; // hash input (A, C, len(A), len(c)
-    printf("KEY - ");
-    AES_PRINT(key);
 
     // get the hash key by encryptin all 0's with the normal key
     init_hash_key(key, H_key);
 
-    printf("H_KEY - ");
-    AES_PRINT(H_key);
     // initialize H, the iv+counter
     init_j(iv, H);
     encrypt(H, key, tag);
-
-    printf("IV - ");
-    AES_PRINT(H);
-    
-    printf("P - ");
-    AES_PRINT(plaintext);
     
 /**************************************************/
     init_ghash_aad(H_key, aad, aad_len,X);
@@ -176,7 +166,7 @@ void gcm_encrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigne
         encrypt(H, key, &(ciphertext[i*16]));
         //then xor the output with the plaintext to get the cipher text
         gf_xor(&(ciphertext[i*16]), &(plaintext[i*16]));
-        init_ghash_cycle(H_key, &ciphertext[i*16], 16,X);\
+        init_ghash_cycle(H_key, &ciphertext[i*16], 16,X);
     }
     if(plaintext_length > blocks * 16){
         unsigned char extend[16];
@@ -188,20 +178,8 @@ void gcm_encrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigne
         encrypt(H, key, &(ciphertext[i*16]));
         //then xor the output with the plaintext to get the cipher text
         gf_xor(&(ciphertext[i*16]), extend);
-        init_ghash_cycle(H_key, &ciphertext[i*16], (plaintext_length - blocks*16), X);\
+        init_ghash_cycle(H_key, &ciphertext[i*16], (plaintext_length - blocks*16), X);
     }
-    end_ghash_cycle(H_key, aad_len, plaintext_length, &X);
+    end_ghash_cycle(H_key, aad_len, plaintext_length, X);
     gf_xor(tag, X); //final tag step
-
-    printf("E(K,Y) - ");
-    AES_PRINT(ciphertext);
-    
-    printf("H - ");
-    AES_PRINT(H_key);
-
-    printf("GHASH - ");
-    AES_PRINT(X);
-    
-    printf("TAG - ");
-    AES_PRINT(tag); 
 }

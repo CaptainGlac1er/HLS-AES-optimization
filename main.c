@@ -5,7 +5,7 @@
 #include "debug.h"
 #include "gunits.h"
 
-#define TEST 0
+#define TEST 2
 
 #if TEST == 0
 unsigned char Key[16]        =
@@ -29,11 +29,11 @@ unsigned char PlainText[16]  =
 };
 unsigned char aad;
 Message message = {
-    &aad,
+    aad,
     0,
-    &IV,
+    IV,
     12,
-    &PlainText,
+    PlainText,
     16
 };
 #elif TEST == 1
@@ -52,11 +52,11 @@ unsigned char PlainText[64]  =
 };
 unsigned char aad;
 Message message = {
-    &aad,
+    aad,
     0,
-    &IV,
+    IV,
     12,
-    &PlainText,
+    PlainText,
     64
 };
 
@@ -79,11 +79,11 @@ unsigned char aad[20] = {
      0xab, 0xad, 0xda, 0xd2 
 };
 Message message = {
-    &aad,
+    aad,
     20,
-    &IV,
+    IV,
     12,
-    &PlainText,
+    PlainText,
     60
 };
 #endif
