@@ -61,7 +61,7 @@ void AESRound(unsigned char StateArray[][4], unsigned char ExpandKey[][4]){
 	for(i = 0; i < 4; i++){
 		for(j = 0; j < 4; j++){
 			//30 03
-			StateArray[j][i] = get(col[j],i);
+			StateArray[i][j] = get(col[j],i);
 		}
 	}
 
@@ -151,16 +151,13 @@ void encrypt(unsigned char PlainText[16], unsigned char Key[16], unsigned char C
     unsigned int i,j;
     for(i=0; i<4; i++) {
         for(j=0; j<4; j++) {
-            TempKey[j][i] = Key[i*4+j];
-            StateArray[j][i] = PlainText[i*4+j];
+            TempKey[i][j] = Key[j*4+i];
+            StateArray[i][j] = PlainText[j*4+i];
         }
     }
 
 	ExpandKey(TempKey, ExpandedKey);
     AddRoundKey(ExpandedKey[0], StateArray);
-    printf("b--------- \r\n");
-    PrintMessage(ExpandedKey, 16 * 10);
-    printf("b---------\r\n");
     
     for(i=1; i<=10; i++){
         if(i != 10){
@@ -174,7 +171,7 @@ void encrypt(unsigned char PlainText[16], unsigned char Key[16], unsigned char C
     }
     for(i=0; i<4; i++) {
         for(j=0; j<4; j++) {
-            CipherText[i*4+j] = StateArray[j][i];
+            CipherText[j*4+i] = StateArray[i][j];
         }
     }
 }

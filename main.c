@@ -1,14 +1,12 @@
 #include "stdio.h"
 #include "string.h"
-#include "aes.h"
-#include "aesslow.h"
 #include "ghash.h"
 #include "debug.h"
 #include "gunits.h"
 #include "gcm_encrypt.h"
 #include "gcm_decrypt.h"
 
-#define TEST 0
+#define TEST 3
 
 #if TEST == 0
 unsigned char Key[16]        =
@@ -193,38 +191,10 @@ unsigned char Y3[16] = {0xb8, 0x3b, 0x53, 0x37, 0x08, 0xbf, 0x53, 0x5d, 0x0a, 0x
 unsigned char Z3[16] = {0xb7, 0x14, 0xc9, 0x04, 0x83, 0x89, 0xaf, 0xd9, 0xf9, 0xbc, 0x5c, 0x1d, 0x43, 0x78, 0xe0, 0x52};
 */
 
-unsigned char TestKey[16]        = { 
-        0x2b, 0x28, 0xab, 0x09,
-		0x7e, 0xae, 0xf7, 0xcf,
-		0x15, 0xd2, 0x15, 0x4f,
-		0x16, 0xa6, 0x88, 0x3c };
-
-unsigned char TestPlainText[16]  = {
-		0x32, 0x88, 0x31, 0xe0,
-		0x43, 0x5a, 0x31, 0x37,
-		0xf6, 0x30, 0x98, 0x07,
-		0xa8, 0x8d, 0xa2, 0x34 };
-unsigned char TestCipherText[16];
-
-
-
 int main() {
-    puts("ENCRYPTION TEST");
+    puts("STARTING DATA");
     PrintMessage(message.Data, message.DataLength);
     puts("");
-    encrypt(TestPlainText, TestKey, TestCipherText);
-
-    puts("ENCRYPTION TEST");
-    PrintMessage(TestCipherText, sizeof(TestCipherText));
-    puts("");
-    encrypt2(TestPlainText, TestKey, TestCipherText);
-
-    puts("ENCRYPTION TEST");
-    PrintMessage(TestCipherText, sizeof(TestCipherText));
-    puts("");
-
-
-
 
     EncyptedMessage encryptedMessage = *newEncyptedMessage(message.HeaderLength, message.SeqLength, message.DataLength, 16);
     Message decryptedMessage = *newMessage(encryptedMessage.HeaderLength, encryptedMessage.SeqLength, encryptedMessage.DataLength);
