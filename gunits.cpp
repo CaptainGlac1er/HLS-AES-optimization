@@ -16,24 +16,24 @@ void PrintMessage(unsigned char *message, unsigned long length){
     printf(" -- Message End -- \r\n");
 }
 EncyptedMessage* newEncyptedMessage(unsigned long HeaderLength, unsigned long SeqLength, unsigned long DataLength, unsigned long ICVLength){
-    EncyptedMessage* out = malloc(sizeof(EncyptedMessage));
-    out->Header = malloc(HeaderLength);
+    EncyptedMessage* out = (EncyptedMessage*)malloc(sizeof(EncyptedMessage));
+    out->Header = (unsigned char*)malloc(HeaderLength);
     out->HeaderLength = HeaderLength;
-    out->Data = malloc(DataLength);
+    out->Data = (unsigned char*)malloc(DataLength);
     out->DataLength = DataLength;
-    out->ICV = malloc(ICVLength);
+    out->ICV = (unsigned char*)malloc(ICVLength);
     out->ICVLength = ICVLength;
-    out->Seq = malloc(SeqLength);
+    out->Seq = (unsigned char*)malloc(SeqLength);
     out->SeqLength = SeqLength;
     return out;
 }
 Message* newMessage(unsigned long HeaderLength, unsigned long SeqLength, unsigned long DataLength){
-    Message* out = malloc(sizeof(Message));
-    out->Header = malloc(HeaderLength);
+    Message* out = (Message*)malloc(sizeof(Message));
+    out->Header = (unsigned char*)malloc(HeaderLength);
     out->HeaderLength = HeaderLength;
-    out->Data = malloc(DataLength);
+    out->Data = (unsigned char*)malloc(DataLength);
     out->DataLength = DataLength;
-    out->Seq = malloc(SeqLength);
+    out->Seq = (unsigned char*)malloc(SeqLength);
     out->SeqLength = SeqLength;
     return out;
 }

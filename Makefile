@@ -1,10 +1,10 @@
 CC = gcc
-CC_FLAGS = -c -g -Wall -Wextra -Wno-unknown-pragmas
+CC_FLAGS = -c -g -Wall -Wextra -Wno-unknown-pragmas  -lstdc++
 LDFLAGS=-lm
 # File names
 EXEC = run
 ODIR = out
-SOURCES = $(wildcard *.c)
+SOURCES = $(wildcard *.c *.cpp)
 OBJECTS = $(SOURCES:.c=.o)
  
 # Main target
