@@ -27,3 +27,13 @@ EncyptedMessage* newEncyptedMessage(unsigned long HeaderLength, unsigned long Se
     out->SeqLength = SeqLength;
     return out;
 }
+Message* newMessage(unsigned long HeaderLength, unsigned long SeqLength, unsigned long DataLength){
+    Message* out = malloc(sizeof(Message));
+    out->Header = malloc(HeaderLength);
+    out->HeaderLength = HeaderLength;
+    out->Data = malloc(DataLength);
+    out->DataLength = DataLength;
+    out->Seq = malloc(SeqLength);
+    out->SeqLength = SeqLength;
+    return out;
+}

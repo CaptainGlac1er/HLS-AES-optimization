@@ -4,6 +4,8 @@
 #include "ghash.h"
 #include "debug.h"
 #include "gunits.h"
+#include "gcm_encrypt.h"
+#include "gcm_decrypt.h"
 
 #define TEST 2
 
@@ -27,9 +29,9 @@ unsigned char PlainText[16]  =
     0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00
 };
-unsigned char aad;
+unsigned char aad = NULL;
 Message message = {
-    aad,
+    &aad,
     0,
     IV,
     12,
@@ -50,9 +52,9 @@ unsigned char PlainText[64]  =
     0x1c, 0x3c, 0x0c, 0x95, 0x95, 0x68, 0x09, 0x53, 0x2f, 0xcf, 0x0e, 0x24, 0x49, 0xa6, 0xb5, 0x25,
     0xb1, 0x6a, 0xed, 0xf5, 0xaa, 0x0d, 0xe6, 0x57, 0xba, 0x63, 0x7b, 0x39, 0x1a, 0xaf, 0xd2, 0x55
 };
-unsigned char aad;
+unsigned char aad = NULL;
 Message message = {
-    aad,
+    &aad,
     0,
     IV,
     12,
@@ -89,7 +91,7 @@ Message message = {
 #endif
 
 
-
+/*
 unsigned char X1[16] = {0x03, 0x88, 0xda, 0xce, 0x60, 0xb6, 0xa3, 0x92, 0xf3, 0x28, 0xc2, 0xb9, 0x71, 0xb2, 0xfe, 0x78};
 unsigned char Y1[16] = {0x66, 0xe9, 0x4b, 0xd4, 0xef, 0x8a, 0x2c, 0x3b, 0x88, 0x4c, 0xfa, 0x59, 0xca, 0x34, 0x2b, 0x2e};
 unsigned char Z1[16] = {0x5e, 0x2e, 0xc7, 0x46, 0x91, 0x70, 0x62, 0x88, 0x2c, 0x85, 0xb0, 0x68, 0x53, 0x53, 0xde, 0xb7};
@@ -101,43 +103,35 @@ unsigned char Z2[16] = {0xf3, 0x8c, 0xbb, 0x1a, 0xd6, 0x92, 0x23, 0xdc, 0xc3, 0x
 unsigned char X3[16] = {0xba, 0x47, 0x1e, 0x04, 0x9d, 0xa2, 0x0e, 0x40, 0x49, 0x5e, 0x28, 0xe5, 0x8c, 0xa8, 0xc5, 0x55};
 unsigned char Y3[16] = {0xb8, 0x3b, 0x53, 0x37, 0x08, 0xbf, 0x53, 0x5d, 0x0a, 0xa6, 0xe5, 0x29, 0x80, 0xd5, 0x3b, 0x78};
 unsigned char Z3[16] = {0xb7, 0x14, 0xc9, 0x04, 0x83, 0x89, 0xaf, 0xd9, 0xf9, 0xbc, 0x5c, 0x1d, 0x43, 0x78, 0xe0, 0x52};
-
+*/
 
 
 
 int main() {
-
-    unsigned char OUT[16];
-
-    puts("GF MULT TEST 1");
-    gf_mult(X1, Y1, OUT);
-    AES_PRINT(OUT);
-    AES_PRINT(Z1);
-
-    puts("");
-    puts("GF MULT TEST 2");
-    gf_mult(X2, Y2, OUT);
-    AES_PRINT(OUT);
-    AES_PRINT(Z2);
-
-    puts("");
-    puts("GF MULT TEST 3");
-    gf_mult(X3, Y3, OUT);
-    AES_PRINT(OUT);
-    AES_PRINT(Z3);
-
-    puts("");
     puts("ENCRYPTION TEST");
     PrintMessage(message.Data, message.DataLength);
 
     EncyptedMessage encryptedMessage = *newEncyptedMessage(message.HeaderLength, message.SeqLength, message.DataLength, 16);
-    //g_counter_mode_encrypt_and_authenticate(Key, message.Seq, message.Data, message.DataLength,
-    //                                        message.Header, message.HeaderLength, encryptedMessage.Data, encryptedMessage.ICV);
-    gcm_encrypt_and_authenticate(Key, message.Seq, message.Data, message.DataLength,
-                                            message.Header, message.HeaderLength, encryptedMessage.Data, encryptedMessage.ICV);
+    Message decryptedMessage = *newMessage(encryptedMessage.HeaderLength, encryptedMessage.SeqLength, encryptedMessage.DataLength);
+    
+    encryptedMessage.Header = message.Header;
+    encryptedMessage.HeaderLength = message.HeaderLength;
+    encryptedMessage.Seq = message.Seq;
+    encryptedMessage.SeqLength = message.SeqLength;
+    gcm_encrypt_and_authenticate(Key, message.Seq, message.Data, message.DataLength, message.Header, message.HeaderLength, encryptedMessage.Data, encryptedMessage.ICV); 
+    
     puts("ENCRYPTED DATA");
     PrintMessage(encryptedMessage.Data, encryptedMessage.DataLength);
     puts("AUTH TAG");
     PrintMessage(encryptedMessage.ICV, encryptedMessage.ICVLength);
+
+    unsigned char Tag[16];
+    gcm_decrypt_and_authenticate(Key, encryptedMessage.Seq, decryptedMessage.Data, decryptedMessage.DataLength, encryptedMessage.Header, encryptedMessage.HeaderLength, encryptedMessage.Data, Tag);
+
+    puts("DECRYPTED DATA");
+    PrintMessage(decryptedMessage.Data, decryptedMessage.DataLength);
+    puts("AUTH TAG");
+    PrintMessage(Tag, sizeof(Tag));
+
     return 0;
 }

@@ -183,14 +183,3 @@ void encrypt(unsigned char PlainText_16[16], unsigned char Key_16[16], unsigned 
     }
 }
 
-void ConstructArray(unsigned char *a, unsigned long long val)
-{
-	a[0] = val >> 56;
-	a[1] = val >> 48;
-	a[2] = val >> 40;
-	a[3] = val >> 32;
-	a[4] = val >> 24;
-	a[5] = val >> 16;
-	a[6] = val >> 8;
-	a[7] = val & 0xff;
-}

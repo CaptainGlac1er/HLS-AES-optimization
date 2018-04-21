@@ -20,5 +20,6 @@ typedef struct EncyptedMessage{
 } EncyptedMessage;
 
 EncyptedMessage* newEncyptedMessage(unsigned long HeaderLength, unsigned long SeqLength, unsigned long DataLength, unsigned long ICVLength);
+Message* newMessage(unsigned long HeaderLength, unsigned long SeqLength, unsigned long DataLength);
 
 void PrintMessage(unsigned char *message, unsigned long length);

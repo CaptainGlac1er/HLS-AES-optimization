@@ -1,8 +1,4 @@
-#include "stdio.h"
-#include "string.h"
-#include "aes.h"
+void init_ghash_aad(unsigned char *H, unsigned char *aad, unsigned long long aad_len, unsigned char *tag);
+void init_ghash_cycle(unsigned char *H, unsigned char *C, unsigned long C_len, unsigned char *tag);
+void end_ghash_cycle(unsigned char *H, unsigned long long aad_len, unsigned long C_len, unsigned char *tag);
 
-void gf_mult(const unsigned char *x, const unsigned char *y, unsigned char *z);
-
-void gcm_encrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigned char *plaintext, unsigned long long plaintext_length,
-        unsigned char *aad, unsigned long long aad_len, unsigned char *ciphertext, unsigned char *tag);

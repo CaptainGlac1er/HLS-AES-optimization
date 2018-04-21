@@ -1,0 +1,2 @@
+void gcm_decrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigned char *plaintext, unsigned long long plaintext_length,
+        unsigned char *aad, unsigned long long aad_len, unsigned char *ciphertext, unsigned char *tag);
