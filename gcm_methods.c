@@ -18,6 +18,7 @@ void init_hash_key(unsigned char *key, unsigned char *H)
     unsigned char temp[16];
     int i;
     for (i = 0; i < 16; i++) {
+#pragma HLS unroll
         temp[i] = 0; // set H to zero
     }
     encrypt(temp, key, H);
@@ -28,6 +29,7 @@ void init_j(unsigned char *iv, unsigned char *H)
 	int i;
     //set the first 96 bits to iv
     for (i=0; i<12; i++) {
+#pragma HLS unroll
         H[i] = iv[i];
     }
     // then init the counter with 1
