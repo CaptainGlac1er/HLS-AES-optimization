@@ -32,8 +32,14 @@ void gcm_decrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigne
     }
     if(plaintext_length > blocks * 16){
         unsigned char extend[16];
-        memcpy(extend, &ciphertext[(blocks) * 16], (plaintext_length - blocks*16));
-        memset(&extend[plaintext_length - blocks*16], 0,16 - (plaintext_length - blocks*16));
+        //memcpy(extend, &ciphertext[(blocks) * 16], (plaintext_length - blocks*16));
+        for(i = 0; i < plaintext_length - blocks*16; i++){
+        	extend[blocks*16 +i] = ciphertext[blocks*16 + i];
+        }
+        for(i = plaintext_length - blocks*16; i < 16; i++){
+        	extend[blocks*16 +i] = 0;
+        }
+        //memset(&extend[plaintext_length - blocks*16], 0,16 - (plaintext_length - blocks*16));
         //increment the counter
         inc32(&(H[12]));
         //encrypt the iv+count

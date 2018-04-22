@@ -8,11 +8,12 @@
 
 void gcm_encrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigned char *plaintext, unsigned long long plaintext_length,
         unsigned char *aad, unsigned long long aad_len, unsigned char *ciphertext, unsigned char *tag){
-    unsigned int i;
+    unsigned int i,j;
     unsigned int blocks = plaintext_length / 16;
     unsigned char H_key[16]; // the hash key
     unsigned char H[16]; // the iv+counter that we encrypt
     unsigned char X[16]; // hash input (A, C, len(A), len(c)
+    unsigned char temp[16];
 
     // get the hash key by encryptin all 0's with the normal key
     init_hash_key(key, H_key);
@@ -30,7 +31,10 @@ void gcm_encrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigne
         encrypt(H, key, &(ciphertext[i*16]));
         //then xor the output with the plaintext to get the cipher text
         gf_xor(&(ciphertext[i*16]), &(plaintext[i*16]));
-        init_ghash_cycle(H_key, &ciphertext[i*16], 16,X);
+        for(j = 0; j < 16; j++){
+        	temp[j] = ciphertext[i*16 + j];
+        }
+        init_ghash_cycle(H_key, temp, 16,X);
     }
     if(plaintext_length > blocks * 16){
         unsigned char extend[16];
@@ -42,7 +46,11 @@ void gcm_encrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigne
         encrypt(H, key, &(ciphertext[i*16]));
         //then xor the output with the plaintext to get the cipher text
         gf_xor(&(ciphertext[i*16]), extend);
-        init_ghash_cycle(H_key, &ciphertext[i*16], (plaintext_length - blocks*16), X);
+        for(j = 0; j < 16; j++){
+        	temp[j] = ciphertext[plaintext_length - blocks*16 + j];
+        }
+        init_ghash_cycle(H_key, temp, (plaintext_length - blocks*16),X);
+        //init_ghash_cycle(H_key, &ciphertext[i*16], (plaintext_length - blocks*16), X);
     }
     end_ghash_cycle(H_key, aad_len, plaintext_length, X);
     gf_xor(tag, X); //final tag step

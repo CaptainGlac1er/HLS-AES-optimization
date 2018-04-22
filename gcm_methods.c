@@ -41,6 +41,7 @@ void init_j(unsigned char *iv, unsigned char *H)
 
 void ConstructArray(unsigned char *a, unsigned long long val)
 {
+#pragma HLS unroll
 	a[0] = val >> 56;
 	a[1] = val >> 48;
 	a[2] = val >> 40;

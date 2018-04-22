@@ -31,7 +31,7 @@ void init_ghash_cycle(unsigned char H[16], unsigned char C[16], unsigned long C_
     unsigned int j;
 	unsigned char subtext[16];
     for (j = 0 ; j < 16; j++) {
-#pragma HLS unroll
+//#pragma HLS unroll
     	if(j < C_len){
     		subtext[j] = C[j];
     	}
