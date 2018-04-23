@@ -237,9 +237,19 @@ void gcm_decrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigne
         //encrypt the iv+count
         encrypt(H, key, &(plaintext[i*16]));
         //then xor the output with the plaintext to get the cipher text
-        
-        gf_xor(&(plaintext[i*16]), &(ciphertext[i*16]));
-        init_ghash_cycle(H_key, &ciphertext[i*16], 16,X);
+        unsigned char temp_p[16];
+        unsigned char temp_c[16];
+        for (k=0; k<16; k++) {
+            temp_p[k] = plaintext [i*16+k];
+            temp_c[k] = ciphertext[i*16+k];
+        }
+        //gf_xor(&(plaintext[i*16]), &(ciphertext[i*16]));
+        gf_xor(temp_p, temp_c);
+        //init_ghash_cycle(H_key, &ciphertext[i*16], 16,X);
+        init_ghash_cycle(H_key, temp_c, 16,X);
+        for (k=0; k<16; k++) {
+            ciphertext[i*16+k] = temp_c[k];
+        }
     }
     if(plaintext_length > blocks * 16){
         unsigned char extend[16];
