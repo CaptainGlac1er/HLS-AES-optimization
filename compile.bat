@@ -1,1 +1,0 @@
-cl *.c /Feout\AES.exe
