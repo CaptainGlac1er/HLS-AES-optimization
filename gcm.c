@@ -204,7 +204,7 @@ void encrypt(unsigned char PlainText[16], unsigned char Key[16], unsigned char C
     }
 }
 
-void AES_PRINT(unsigned char * array_ptr) {
+void AES_PRINT(unsigned char array_ptr[16]) {
     printf("HEX:");
     int i;
     for (i=0; i<16; i++) {
@@ -214,8 +214,8 @@ void AES_PRINT(unsigned char * array_ptr) {
 }
 
 #include <string.h>
-void gcm_decrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigned char *plaintext, unsigned long long plaintext_length,
-    unsigned char *aad, unsigned long long aad_len, unsigned char *ciphertext, unsigned char *tag){
+void gcm_decrypt_and_authenticate(unsigned char key[16], unsigned char iv[12], unsigned char plaintext[1024], unsigned long long plaintext_length,
+    unsigned char aad[1024], unsigned long long aad_len, unsigned char ciphertext[1024], unsigned char tag[16]){
     unsigned int i, j, k;
     unsigned int blocks = plaintext_length / 16;
     unsigned char H_key[16]; // the hash key

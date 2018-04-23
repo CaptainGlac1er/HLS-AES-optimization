@@ -6,14 +6,14 @@ void encrypt(unsigned char PlainText[16], unsigned char Key[16], unsigned char C
 #endif
 #ifndef DEBUG_H
 #define DEBUG_H
-void AES_PRINT(unsigned char * array_ptr);
+void AES_PRINT(unsigned char array_ptr[16]);
 
 #endif
 #ifndef DECRYPT_H
 #define DECRYPT_H
 
-void gcm_decrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigned char *plaintext, unsigned long long plaintext_length,
-        unsigned char *aad, unsigned long long aad_len, unsigned char *ciphertext, unsigned char *tag);
+void gcm_decrypt_and_authenticate(unsigned char key[16], unsigned char iv[12], unsigned char plaintext[1024], unsigned long long plaintext_length,
+    unsigned char aad[1024], unsigned long long aad_len, unsigned char ciphertext[1024], unsigned char tag[16]);
 
 #endif
 #ifndef ENCRYPT
