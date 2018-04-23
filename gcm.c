@@ -216,7 +216,7 @@ void AES_PRINT(unsigned char * array_ptr) {
 #include <string.h>
 void gcm_decrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigned char *plaintext, unsigned long long plaintext_length,
     unsigned char *aad, unsigned long long aad_len, unsigned char *ciphertext, unsigned char *tag){
-    unsigned int i, j;
+    unsigned int i, j, k;
     unsigned int blocks = plaintext_length / 16;
     unsigned char H_key[16]; // the hash key
     unsigned char H[16]; // the iv+counter that we encrypt
@@ -233,10 +233,11 @@ void gcm_decrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigne
     init_ghash_aad(H_key, aad, aad_len,X);
     for (i = 0; i < blocks; i++) {
         //increment the counter
-        inc32(&(H[12]));
+        inc32(H);
         //encrypt the iv+count
         encrypt(H, key, &(plaintext[i*16]));
         //then xor the output with the plaintext to get the cipher text
+        
         gf_xor(&(plaintext[i*16]), &(ciphertext[i*16]));
         init_ghash_cycle(H_key, &ciphertext[i*16], 16,X);
     }
@@ -251,7 +252,7 @@ void gcm_decrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigne
         }
         //memset(&extend[plaintext_length - blocks*16], 0,16 - (plaintext_length - blocks*16));
         //increment the counter
-        inc32(&(H[12]));
+        inc32(H);
         //encrypt the iv+count
         encrypt(H, key, &(plaintext[blocks*16]));
         //then xor the output with the plaintext to get the cipher text
@@ -283,7 +284,7 @@ void gcm_encrypt_and_authenticate(unsigned char key[16], unsigned char iv[12], u
     init_ghash_aad(H_key, aad, aad_len,X);
     for (i = 0; i < blocks; i++) {
         //increment the counter
-        inc32(&(H[12]));
+        inc32(H);
         //encrypt the iv+count
         encrypt(H, key, &(ciphertext[i*16]));
         //then xor the output with the plaintext to get the cipher text
@@ -303,7 +304,7 @@ void gcm_encrypt_and_authenticate(unsigned char key[16], unsigned char iv[12], u
         	extend[j] = plaintext[((blocks) * 16) + j];
         }
         //increment the counter
-        inc32(&(H[12]));
+        inc32(H);
         //encrypt the iv+count
         encrypt(H, key, &(ciphertext[(blocks)*16]));
         //then xor the output with the plaintext to get the cipher text
@@ -319,15 +320,15 @@ void gcm_encrypt_and_authenticate(unsigned char key[16], unsigned char iv[12], u
 }
 
 
-void inc32(unsigned char v[4])
+void inc32(unsigned char v[16])
 {
     //convert it to an int and then increment it
-    int temp = (v[0] << 24) | (v[1] << 16) | (v[2] << 8) | v[3];
+    int temp = (v[12] << 24) | (v[13] << 16) | (v[14] << 8) | v[15];
     temp++;
-    v[3] = (temp >>  0) & 0xff;
-    v[2] = (temp >>  8) & 0xff;
-    v[1] = (temp >> 16) & 0xff;
-    v[0] = (temp >> 24) & 0xff;
+    v[15] = (temp >>  0) & 0xff;
+    v[14] = (temp >>  8) & 0xff;
+    v[13] = (temp >> 16) & 0xff;
+    v[12] = (temp >> 24) & 0xff;
 }
 
 void init_hash_key(unsigned char key[16], unsigned char H[16])
