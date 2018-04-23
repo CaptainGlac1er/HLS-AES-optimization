@@ -6,7 +6,7 @@
 #include <string.h>
 void gcm_decrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigned char *plaintext, unsigned long long plaintext_length,
     unsigned char *aad, unsigned long long aad_len, unsigned char *ciphertext, unsigned char *tag){
-    unsigned int i;
+    unsigned int i, j;
     unsigned int blocks = plaintext_length / 16;
     unsigned char H_key[16]; // the hash key
     unsigned char H[16]; // the iv+counter that we encrypt
@@ -33,20 +33,20 @@ void gcm_decrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigne
     if(plaintext_length > blocks * 16){
         unsigned char extend[16];
         //memcpy(extend, &ciphertext[(blocks) * 16], (plaintext_length - blocks*16));
-        for(i = 0; i < plaintext_length - blocks*16; i++){
-        	extend[blocks*16 +i] = ciphertext[blocks*16 + i];
+        for(j = 0; j < 16; j++){
+        	extend[j] = 0;
         }
-        for(i = plaintext_length - blocks*16; i < 16; i++){
-        	extend[blocks*16 +i] = 0;
+        for(j = 0; j < plaintext_length%16; j++){
+        	extend[j] = ciphertext[blocks*16 + j];
         }
         //memset(&extend[plaintext_length - blocks*16], 0,16 - (plaintext_length - blocks*16));
         //increment the counter
         inc32(&(H[12]));
         //encrypt the iv+count
-        encrypt(H, key, &(plaintext[i*16]));
+        encrypt(H, key, &(plaintext[blocks*16]));
         //then xor the output with the plaintext to get the cipher text
-        gf_xor(&(plaintext[i*16]), extend);
-        init_ghash_cycle(H_key, &ciphertext[i*16], (plaintext_length - blocks*16), X);
+        gf_xor(&(plaintext[blocks*16]), extend);
+        init_ghash_cycle(H_key, &ciphertext[blocks*16], (plaintext_length - blocks*16), X);
     }
     end_ghash_cycle(H_key, aad_len, plaintext_length, X);
     gf_xor(tag, X); //final tag step
