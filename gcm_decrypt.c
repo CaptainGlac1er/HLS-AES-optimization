@@ -30,7 +30,6 @@ void gcm_decrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigne
 /**************************************************/
     init_ghash_aad(H_key, aad, aad_len,X);
     for (i = 0; i < blocks; i++) {
-        //increment the counter;
     	decryptCycle(key, H, H_key, &ciphertext[i * 16], 16, &plaintext[i * 16], X);
     }
     if(plaintext_length > blocks * 16){
@@ -44,13 +43,6 @@ void gcm_decrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigne
         }
         //memset(&extend[plaintext_length - blocks*16], 0,16 - (plaintext_length - blocks*16));
         decryptCycle(key, H, H_key, extend, (plaintext_length - blocks*16), &plaintext[blocks * 16], X);
-        //increment the counter
-        //inc32(&(H[12]));
-        //encrypt the iv+count
-        //encrypt(H, key, &(plaintext[blocks*16]));
-        //then xor the output with the plaintext to get the cipher text
-        //gf_xor(&(plaintext[blocks*16]), extend);
-        //init_ghash_cycle(H_key, &ciphertext[blocks*16], (plaintext_length - blocks*16), X);
     }
     end_ghash_cycle(H_key, aad_len, plaintext_length, X);
     gf_xor(tag, X); //final tag step
