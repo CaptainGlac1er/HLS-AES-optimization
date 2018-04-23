@@ -18,3 +18,7 @@ $(EXEC): $(OBJECTS)
 # To remove generated files
 clean:
 	rm -f $(EXEC) $(OBJECTS)
+
+address:$(OBJECTS) 
+	$(CC) $(OBJECTS) -o $(ODIR)/$(EXEC) $(LDFLAGS)
+

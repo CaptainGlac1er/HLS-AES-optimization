@@ -3,16 +3,31 @@
 #include "gfstuff.h"
 #include "ghash.h"
 #include "aes.h"
+#include "debug.h"
 #include <string.h>
 
-
+void encryptCycle(unsigned char key[16], unsigned char H[16], unsigned char H_key[16], unsigned char block[16], unsigned long long b_length, unsigned char out[16], unsigned char X[16]){
+	int i;
+	unsigned char temp[16];
+	//increment the counter
+	inc32(&(H[12]));
+	//encrypt the iv+count
+	encrypt(H, key, out);
+	//then xor the output with the plaintext to get the cipher text
+	gf_xor(out, block);
+	for(i = 0; i < b_length; i++){
+		temp[i] = out[i];
+	}
+	//init_ghash_cycle(H_key, temp, 16,X);
+    init_ghash_cycle(H_key, temp, b_length,X);
+}
 void gcm_encrypt_and_authenticate(unsigned char key[16], unsigned char iv[12], unsigned char plaintext[1024], unsigned long long plaintext_length,
         unsigned char aad[1024], unsigned long long aad_len, unsigned char ciphertext[1024], unsigned char tag[16]) {   unsigned int i,j;
     unsigned int blocks = plaintext_length / 16;
     unsigned char H_key[16]; // the hash key
     unsigned char H[16]; // the iv+counter that we encrypt
     unsigned char X[16]; // hash input (A, C, len(A), len(c)
-    unsigned char temp[16];
+    //unsigned char temp[16];
 
     // get the hash key by encryptin all 0's with the normal key
     init_hash_key(key, H_key);
@@ -24,7 +39,7 @@ void gcm_encrypt_and_authenticate(unsigned char key[16], unsigned char iv[12], u
 /**************************************************/
     init_ghash_aad(H_key, aad, aad_len,X);
     for (i = 0; i < blocks; i++) {
-        //increment the counter
+        /*//increment the counter
         inc32(&(H[12]));
         //encrypt the iv+count
         encrypt(H, key, &(ciphertext[i*16]));
@@ -33,7 +48,8 @@ void gcm_encrypt_and_authenticate(unsigned char key[16], unsigned char iv[12], u
         for(j = 0; j < 16; j++){
         	temp[j] = ciphertext[i*16 + j];
         }
-        init_ghash_cycle(H_key, temp, 16,X);
+        init_ghash_cycle(H_key, temp, 16,X);*/
+    	encryptCycle(key, H, H_key, &plaintext[i * 16], 16, &ciphertext[i * 16], X);
     }
     if(plaintext_length%16 !=0){
 
@@ -44,6 +60,7 @@ void gcm_encrypt_and_authenticate(unsigned char key[16], unsigned char iv[12], u
         for(j = 0; j < (plaintext_length%16); j++){
         	extend[j] = plaintext[((blocks) * 16) + j];
         }
+    	/*
         //increment the counter
         inc32(&(H[12]));
         //encrypt the iv+count
@@ -52,8 +69,9 @@ void gcm_encrypt_and_authenticate(unsigned char key[16], unsigned char iv[12], u
         gf_xor(&(ciphertext[(blocks)*16]), extend);
         for(j = 0; j < 16; j++){
         	temp[j] = ciphertext[(blocks)*16 + j];
-        }
-        init_ghash_cycle(H_key, temp, (plaintext_length - blocks*16),X);
+        }*/
+        encryptCycle(key, H, H_key, extend, (plaintext_length - blocks*16), &ciphertext[blocks * 16], X);
+        //init_ghash_cycle(H_key, temp, (plaintext_length - blocks*16),X);
         //init_ghash_cycle(H_key, &ciphertext[i*16], (plaintext_length - blocks*16), X);
     }
     end_ghash_cycle(H_key, aad_len, plaintext_length, X);

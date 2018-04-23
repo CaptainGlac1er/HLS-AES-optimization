@@ -6,7 +6,7 @@
 #include "gcm_encrypt.h"
 #include "gcm_decrypt.h"
 
-#define TEST 3
+#define TEST 2
 
 #if TEST == 0
 unsigned char Key[16]        =
