@@ -190,6 +190,7 @@ unsigned char Z3[16] = {0xb7, 0x14, 0xc9, 0x04, 0x83, 0x89, 0xaf, 0xd9, 0xf9, 0x
 
 
 int main() {
+	int q;
     puts("ENCRYPTION TEST");
     PrintMessage(message.Data, message.DataLength);
 
@@ -237,20 +238,20 @@ int main() {
 
         puts("GF MULT TEST 1");
         gf_mult(X1, Y1, OUT);
-        for (int q=0; q<16; q++) {
+        for (q=0; q<16; q++) {
         	printf("0x%02x ", OUT[q]);
         }
         puts("GF MULT TEST 1");
         gf_mult(X1, Y1, OUT);
 
 
-        for (int q=0; q<16; q++) {
+        for (q=0; q<16; q++) {
         	printf("0x%02x ", OUT[q]);
         }
         puts("GF MULT TEST 1");
         gf_mult_64(X1, Y1, OUT);
 
-        for (int q=0; q<16; q++) {
+        for (q=0; q<16; q++) {
         	printf("0x%02x ", OUT[q]);
         }
         puts("");
