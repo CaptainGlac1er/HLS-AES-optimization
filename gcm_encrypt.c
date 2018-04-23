@@ -6,9 +6,8 @@
 #include <string.h>
 
 
-void gcm_encrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigned char *plaintext, unsigned long long plaintext_length,
-        unsigned char *aad, unsigned long long aad_len, unsigned char *ciphertext, unsigned char *tag){
-    unsigned int i,j;
+void gcm_encrypt_and_authenticate(unsigned char key[16], unsigned char iv[12], unsigned char plaintext[1024], unsigned long long plaintext_length,
+        unsigned char aad[1024], unsigned long long aad_len, unsigned char ciphertext[1024], unsigned char tag[16]) {   unsigned int i,j;
     unsigned int blocks = plaintext_length / 16;
     unsigned char H_key[16]; // the hash key
     unsigned char H[16]; // the iv+counter that we encrypt
@@ -38,8 +37,12 @@ void gcm_encrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigne
     }
     if(plaintext_length > blocks * 16){
         unsigned char extend[16];
-        memcpy(extend, &plaintext[(blocks) * 16], (plaintext_length - blocks*16));
-        memset(&extend[plaintext_length - blocks*16], 0,16 - (plaintext_length - blocks*16));
+        for(j = 0; j < 16; j++){
+        	extend[j] = 0;
+        }
+        for(j = 0; j < (plaintext_length - blocks*16); j++){
+        	extend[j] = plaintext[((blocks) * 16) + j];
+        }
         //increment the counter
         inc32(&(H[12]));
         //encrypt the iv+count
