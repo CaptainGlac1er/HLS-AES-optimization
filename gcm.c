@@ -235,7 +235,15 @@ void gcm_decrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigne
         //increment the counter
         inc32(H);
         //encrypt the iv+count
-        encrypt(H, key, &(plaintext[i*16]));
+        unsigned char temp_enc[16];
+        for(k=0; k<16; k++) {
+            temp_enc[k] = plaintext[i*16+k];
+        }
+        //encrypt(H, key, &(plaintext[i*16]));
+        encrypt(H, key, temp_enc);
+        for(k=0; k<16; k++) {
+            plaintext[i*16+k] = temp_enc[k];
+        }
         //then xor the output with the plaintext to get the cipher text
         unsigned char temp_p[16];
         unsigned char temp_c[16];
@@ -264,7 +272,15 @@ void gcm_decrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigne
         //increment the counter
         inc32(H);
         //encrypt the iv+count
-        encrypt(H, key, &(plaintext[blocks*16]));
+        unsigned char temp_enc[16];
+        for(k=0; k<16; k++) {
+            temp_enc[k] = plaintext[blocks*16+k];
+        }
+        //encrypt(H, key, &(plaintext[blocks*16]));
+        encrypt(H, key, temp_enc);
+        for(k=0; k<16; k++) {
+            plaintext[blocks*16+k] = temp_enc[k];
+        }
         //then xor the output with the plaintext to get the cipher text
         unsigned char temp_p[16];
         for (k=0; k<16; k++) {
@@ -304,7 +320,15 @@ void gcm_encrypt_and_authenticate(unsigned char key[16], unsigned char iv[12], u
         //increment the counter
         inc32(H);
         //encrypt the iv+count
-        encrypt(H, key, &(ciphertext[i*16]));
+        unsigned char temp_enc[16];
+        for(k=0; k<16; k++) {
+            temp_enc[k] = ciphertext[i*16+k];
+        }
+        //encrypt(H, key, &(ciphertext[i*16]));
+        encrypt(H, key, temp_enc);
+        for(k=0; k<16; k++) {
+            ciphertext[i*16+k] = temp_enc[k];
+        }
         //then xor the output with the plaintext to get the cipher text
         unsigned char temp_p[16];
         unsigned char temp_c[16];
@@ -334,7 +358,15 @@ void gcm_encrypt_and_authenticate(unsigned char key[16], unsigned char iv[12], u
         //increment the counter
         inc32(H);
         //encrypt the iv+count
-        encrypt(H, key, &(ciphertext[(blocks)*16]));
+        unsigned char temp_enc[16];
+        for(k=0; k<16; k++) {
+            temp_enc[k] = ciphertext[blocks*16+k];
+        }
+        //encrypt(H, key, &(ciphertext[(blocks)*16]));
+        encrypt(H, key, temp_enc);
+        for(k=0; k<16; k++) {
+            ciphertext[blocks*16+k] = temp_enc[k];
+        }
         //then xor the output with the plaintext to get the cipher text
         unsigned char temp_c[16];
         for (k=0; k<16; k++) {
