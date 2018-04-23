@@ -35,22 +35,23 @@ void gcm_encrypt_and_authenticate(unsigned char key[16], unsigned char iv[12], u
         }
         init_ghash_cycle(H_key, temp, 16,X);
     }
-    if(plaintext_length > blocks * 16){
+    if(plaintext_length%16 !=0){
+
         unsigned char extend[16];
         for(j = 0; j < 16; j++){
         	extend[j] = 0;
         }
-        for(j = 0; j < (plaintext_length - blocks*16); j++){
+        for(j = 0; j < (plaintext_length%16); j++){
         	extend[j] = plaintext[((blocks) * 16) + j];
         }
         //increment the counter
         inc32(&(H[12]));
         //encrypt the iv+count
-        encrypt(H, key, &(ciphertext[i*16]));
+        encrypt(H, key, &(ciphertext[(blocks)*16]));
         //then xor the output with the plaintext to get the cipher text
-        gf_xor(&(ciphertext[i*16]), extend);
+        gf_xor(&(ciphertext[(blocks)*16]), extend);
         for(j = 0; j < 16; j++){
-        	temp[j] = ciphertext[plaintext_length - blocks*16 + j];
+        	temp[j] = ciphertext[(blocks)*16 + j];
         }
         init_ghash_cycle(H_key, temp, (plaintext_length - blocks*16),X);
         //init_ghash_cycle(H_key, &ciphertext[i*16], (plaintext_length - blocks*16), X);
