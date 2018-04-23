@@ -291,7 +291,15 @@ void gcm_decrypt_and_authenticate(unsigned char *key, unsigned char *iv, unsigne
         for (k=0; k<16; k++) {
             plaintext[blocks*16+k] = temp_p[k];
         }
-        init_ghash_cycle(H_key, &ciphertext[blocks*16], (plaintext_length - blocks*16), X);
+        unsigned char temp_ghash[16];
+        for(k=0; k<16; k++) {
+            temp_ghash[k] = ciphertext[blocks*16+k];
+        }
+        //init_ghash_cycle(H_key, &ciphertext[blocks*16], (plaintext_length - blocks*16), X);
+        init_ghash_cycle(H_key, temp_ghash, (plaintext_length - blocks*16), X);
+        for(k=0; k<16; k++) {
+            ciphertext[blocks*16+k] = temp_ghash[k];
+        }
     }
     end_ghash_cycle(H_key, aad_len, plaintext_length, X);
     gf_xor(tag, X); //final tag step
@@ -609,9 +617,16 @@ void init_ghash_cycle(unsigned char H[16], unsigned char C[16], unsigned long C_
     gf_mult_64(H,subtext,tag);
 }
 void end_ghash_cycle(unsigned char H[16], unsigned long long aad_len, unsigned long C_len, unsigned char tag[16]){
+	unsigned char temp1[8]; 
+	unsigned char temp2[8]; 
 	unsigned char temp[16]; 
-    ConstructArray(temp, aad_len * 8);
-    ConstructArray(&temp[8], C_len * 8);
+    int k;
+    ConstructArray(temp1, aad_len * 8);
+    ConstructArray(temp2, C_len * 8);
+    for(k=0; k<8; k++){
+        temp[k] = temp1[k];
+        temp[k+8] = temp2[k];
+    }
     gf_xor(temp,tag);
     gf_mult_64(temp,H,tag);
 }
