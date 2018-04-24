@@ -7,14 +7,14 @@
 #include <string.h>
 
 void encryptCycle(unsigned char key[16], unsigned char H[16], unsigned char H_key[16], unsigned char block[16], unsigned long long b_length, unsigned char out[16], unsigned char X[16]){
-#pragma HLS INTERFACE s_axilite port=return bundle=AESGCM_BUS
-#pragma HLS INTERFACE s_axilite port=key bundle=AESGCM_BUS
-#pragma HLS INTERFACE s_axilite port=H bundle=AESGCM_BUS
-#pragma HLS INTERFACE s_axilite port=H_key bundle=AESGCM_BUS
-#pragma HLS INTERFACE s_axilite port=block bundle=AESGCM_BUS
-#pragma HLS INTERFACE s_axilite port=b_length bundle=AESGCM_BUS
-#pragma HLS INTERFACE s_axilite port=out bundle=AESGCM_BUS
-#pragma HLS INTERFACE s_axilite port=X bundle=AESGCM_BUS
+//#pragma HLS INTERFACE s_axilite port=return bundle=AESGCM_BUS
+//#pragma HLS INTERFACE s_axilite port=key bundle=AESGCM_BUS
+//#pragma HLS INTERFACE s_axilite port=H bundle=AESGCM_BUS
+//#pragma HLS INTERFACE s_axilite port=H_key bundle=AESGCM_BUS
+//#pragma HLS INTERFACE s_axilite port=block bundle=AESGCM_BUS
+//#pragma HLS INTERFACE s_axilite port=b_length bundle=AESGCM_BUS
+//#pragma HLS INTERFACE s_axilite port=out bundle=AESGCM_BUS
+//#pragma HLS INTERFACE s_axilite port=X bundle=AESGCM_BUS
 	unsigned int i;
 	unsigned char temp[16];
 	//increment the counter
@@ -31,6 +31,16 @@ void encryptCycle(unsigned char key[16], unsigned char H[16], unsigned char H_ke
 }
 void gcm_encrypt_and_authenticate(unsigned char key[16], unsigned char iv[12], unsigned char plaintext[1024], unsigned long long plaintext_length,
         unsigned char aad[1024], unsigned long long aad_len, unsigned char ciphertext[1024], unsigned char tag[16]) {   unsigned int i,j;
+#pragma HLS INTERFACE s_axilite port=return bundle=AESGCM_BUS
+#pragma HLS INTERFACE s_axilite port=key bundle=AESGCM_BUS
+#pragma HLS INTERFACE s_axilite port=iv bundle=AESGCM_BUS
+#pragma HLS INTERFACE s_axilite port=plaintext bundle=AESGCM_BUS
+#pragma HLS INTERFACE s_axilite port=plaintext_length bundle=AESGCM_BUS
+#pragma HLS INTERFACE s_axilite port=aad bundle=AESGCM_BUS
+#pragma HLS INTERFACE s_axilite port=aad_len bundle=AESGCM_BUS
+#pragma HLS INTERFACE s_axilite port=ciphertext bundle=AESGCM_BUS
+#pragma HLS INTERFACE s_axilite port=tag bundle=AESGCM_BUS
+
     unsigned int blocks = plaintext_length / 16;
     unsigned char H_key[16]; // the hash key
     unsigned char H[16]; // the iv+counter that we encrypt

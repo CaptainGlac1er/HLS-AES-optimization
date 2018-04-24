@@ -19,7 +19,7 @@ EncyptedMessage* newEncyptedMessage(unsigned long HeaderLength, unsigned long Se
     EncyptedMessage* out = malloc(sizeof(EncyptedMessage));
     out->Header = malloc(HeaderLength);
     out->HeaderLength = HeaderLength;
-    out->Data = malloc(DataLength);
+    out->Data = malloc(DataLength*10);
     out->DataLength = DataLength;
     out->ICV = malloc(ICVLength);
     out->ICVLength = ICVLength;
@@ -31,7 +31,7 @@ Message* newMessage(unsigned long HeaderLength, unsigned long SeqLength, unsigne
     Message* out = malloc(sizeof(Message));
     out->Header = malloc(HeaderLength);
     out->HeaderLength = HeaderLength;
-    out->Data = malloc(DataLength);
+    out->Data = malloc(DataLength*10);
     out->DataLength = DataLength;
     out->Seq = malloc(SeqLength);
     out->SeqLength = SeqLength;
