@@ -28,20 +28,20 @@ const unsigned char RCon[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 
 #define get(x,y)	((unsigned char)(x >> (y*8)))
 #define to(x,y)		(((unsigned char)x) << (y*8))
 #define xTime(x) ((x<<1) ^ ((x & 0x080) ? 0x1b : 0x00))
-void SubBytes (unsigned char StateArray[][4])
+void SubBytes (unsigned char StateArray[4][4])
 {
 	int i,j;
 	for(i=0; i<4; i++)
-#pragma HLS unroll
+//#pragma HLS unroll
 		for(j=0; j<4; j++){
-#pragma HLS unroll
+//#pragma HLS unroll
 			StateArray[i][j] = SBox[StateArray[i][j]];
 		}
 }
 void calcTbox(){
     unsigned int i;
 	for(i = 0; i <= 0xFF; i++){
-#pragma HLS pipeline
+//#pragma HLS pipeline
 
 		T[0][i] = to(xTime(SBox[i]),0) | to(SBox[i],1) | to(SBox[i],2) |to( xTime(SBox[i])^SBox[i],3) ;
 
@@ -52,42 +52,42 @@ void calcTbox(){
 		T[3][i] = to(SBox[i],0) |  to(SBox[i],1) | to(xTime(SBox[i])^SBox[i],2) | to(xTime(SBox[i]),3);
 	}
 }
-void AESRound(unsigned char StateArray[][4], unsigned char ExpandKey[][4]){
-#pragma HLS ARRAY_PARTITION variable=T
+void AESRound(unsigned char StateArray[4][4], unsigned char ExpandKey[11][4]){
+//#pragma HLS ARRAY_PARTITION variable=T
 	unsigned int col[4];
-#pragma HLS ARRAY_RESHAPE variable=col complete dim=1
+//#pragma HLS ARRAY_RESHAPE variable=col complete dim=1
 	unsigned int expand,box;
     int i,j;
 	for(i = 0; i < 4; i++){
-#pragma HLS unroll
+//#pragma HLS unroll
 		expand = ((to(ExpandKey[0][i],0) | to(ExpandKey[1][i],1) | to(ExpandKey[2][i],2) | to(ExpandKey[3][i],3)));
 		box = T[0][StateArray[0][i%4]] ^ T[1][StateArray[1][(i+1)%4]] ^ T[2][StateArray[2][(i+2)%4]] ^ T[3][StateArray[3][(i+3)%4]];
 		col[i] = expand ^ box;
 	}
 	for(i = 0; i < 4; i++){
-#pragma HLS unroll
+//#pragma HLS unroll
 		for(j = 0; j < 4; j++){
-#pragma HLS unroll
+//#pragma HLS unroll
 			//30 03
 			StateArray[i][j] = get(col[j],i);
 		}
 	}
 
 }
-void ExpandKey (unsigned char Key[][4], unsigned char ExpandedKey[][4][4]){
-#pragma	ARRAY_PARTITION variable=ExpandedKey
+void ExpandKey (unsigned char Key[4][4], unsigned char ExpandedKey[11][4][4]){
+//#pragma	ARRAY_PARTITION variable=ExpandedKey
 	unsigned char TempKey[4][4];
-	memset(TempKey, 0, 4*4*sizeof (unsigned char));
+	//memset(TempKey, 0, 4*4*sizeof (unsigned char));
 	unsigned char TempKeyCol[4];
-#pragma	ARRAY_PARTITION variable=TempKeyCol
-	memset(TempKeyCol, 0, 4*sizeof (unsigned char));
+//#pragma	ARRAY_PARTITION variable=TempKeyCol
+	//memset(TempKeyCol, 0, 4*sizeof (unsigned char));
 	int i,j;
 
 	// Encryption Key copied to Expanded Key [0]
-#pragma HLS unroll
 	for(i = 0; i < 4; i++){
-#pragma HLS unroll
+//#pragma HLS unroll
 		for(j = 0; j < 4; j++){
+//#pragma HLS unroll
 			ExpandedKey[0][i][j] = Key[i][j];
 		}
 	}
@@ -111,8 +111,8 @@ void ExpandKey (unsigned char Key[][4], unsigned char ExpandedKey[][4][4]){
 		TempKeyCol[0]^=RCon[i-1];
 
 		// XOR
-#pragma HLS unroll
 		for(j=0; j<4; j++){
+//#pragma HLS unroll
 			TempKeyCol[0] = TempKeyCol[0]^ExpandedKey[i-1][0][j];
 			TempKeyCol[1] = TempKeyCol[1]^ExpandedKey[i-1][1][j];
 			TempKeyCol[2] = TempKeyCol[2]^ExpandedKey[i-1][2][j];
@@ -126,18 +126,18 @@ void ExpandKey (unsigned char Key[][4], unsigned char ExpandedKey[][4][4]){
 	}
 }
 
-void AddRoundKey (unsigned char Key[][4], unsigned char StateArray[][4])
+void AddRoundKey (unsigned char Key[4][4], unsigned char StateArray[4][4])
 {
 	int i,j;
 	for(i=0; i<4; i++){
-#pragma HLS unroll
+//#pragma HLS unroll
 		for(j=0; j<4; j++){
-#pragma HLS unroll
+//#pragma HLS unroll
 			StateArray[i][j] ^= Key[i][j];
 		}
 	}
 }
-void ShiftRows (unsigned char StateArray[][4])
+void ShiftRows (unsigned char StateArray[4][4])
 {
 	unsigned char x;
 	// Row#1 - rotate 1 column to the left
@@ -164,8 +164,8 @@ void ShiftRows (unsigned char StateArray[][4])
 
 
 void encrypt(unsigned char PlainText[16], unsigned char Key[16], unsigned char CipherText[16]){
-#pragma HLS ARRAY_PARTITION variable=Key
-#pragma HLS ARRAY_PARTITION variable=PlainText
+//#pragma HLS ARRAY_PARTITION variable=Key
+//#pragma HLS ARRAY_PARTITION variable=PlainText
     if(!TboxCalculated){
         calcTbox();
         TboxCalculated = 1;
@@ -175,9 +175,9 @@ void encrypt(unsigned char PlainText[16], unsigned char Key[16], unsigned char C
     unsigned char ExpandedKey[11][4][4];
     unsigned int i,j;
     for(i=0; i<4; i++) {
-#pragma HLS unroll
+//#pragma HLS unroll
         for(j=0; j<4; j++) {
-#pragma HLS unroll
+//#pragma HLS unroll
             TempKey[i][j] = Key[j*4+i];
             StateArray[i][j] = PlainText[j*4+i];
         }
@@ -197,9 +197,9 @@ void encrypt(unsigned char PlainText[16], unsigned char Key[16], unsigned char C
         }
     }
     for(i=0; i<4; i++) {
-#pragma HLS unroll
+//#pragma HLS unroll
         for(j=0; j<4; j++) {
-#pragma HLS unroll
+//#pragma HLS unroll
             CipherText[j*4+i] = StateArray[i][j];
         }
     }
