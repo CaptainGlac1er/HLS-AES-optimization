@@ -1,7 +1,7 @@
 #include "gcm_methods.h"
 #include "aes.h"
 
-void inc32(unsigned char *v)
+void inc32(unsigned char v[4])
 {
     //convert it to an int and then increment it
     int temp = (v[0] << 24) | (v[1] << 16) | (v[2] << 8) | v[3];
@@ -12,7 +12,7 @@ void inc32(unsigned char *v)
     v[0] = (temp >> 24) & 0xff;
 }
 
-void init_hash_key(unsigned char *key, unsigned char *H)
+void init_hash_key(unsigned char key[16], unsigned char H[16])
 {
     //hash key is just the encryption of all zeros
     unsigned char temp[16];
@@ -24,7 +24,7 @@ void init_hash_key(unsigned char *key, unsigned char *H)
     encrypt(temp, key, H);
 }
 
-void init_j(unsigned char *iv, unsigned char *H)
+void init_j(unsigned char iv[12], unsigned char H[16])
 {
 	int i;
     //set the first 96 bits to iv
@@ -39,7 +39,7 @@ void init_j(unsigned char *iv, unsigned char *H)
     H[15] = 0x01;
 }
 
-void ConstructArray(unsigned char *a, unsigned long long val)
+void ConstructArray(unsigned char a[8], unsigned long long val)
 {
 #pragma HLS unroll
 	a[0] = val >> 56;
